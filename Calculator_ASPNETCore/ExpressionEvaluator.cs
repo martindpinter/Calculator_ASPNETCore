@@ -58,6 +58,10 @@ namespace Calculator_ASPNETCore
                 }
                 else
                 {
+                    if (resStack.Count < 2)
+                        return "";
+
+
                     double rhs = resStack.Pop();
                     double lhs = resStack.Pop();
 
