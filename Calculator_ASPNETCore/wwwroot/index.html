@@ -13,13 +13,47 @@
             3: "Parsing error"
         };
 
+        function disableResults() {
+            const divCalcRes = document.getElementById("divCalcRes");
+            const divPostfix = document.getElementById("divPostfix");
+            const divPostfixLabel = document.getElementById("divPostfixLabel");
+
+            console.log("we are in disableResults()");
+            const disabledOpacity = 0.1;
+            divCalcRes.style.opacity = disabledOpacity;
+            divPostfix.style.opacity = disabledOpacity;
+            divPostfixLabel.style.opacity = disabledOpacity;
+
+            const disabledDecoration = "line-through";
+            divCalcRes.style.textDecoration = disabledDecoration;
+            divPostfix.style.textDecoration = disabledDecoration;
+            divPostfixLabel.textDecoration = disabledDecoration;
+        }
+
+        function enableResults() {
+            const divCalcRes = document.getElementById("divCalcRes");
+            const divPostfix = document.getElementById("divPostfix");
+            const divPostfixLabel = document.getElementById("divPostfixLabel");
+
+            const enabledOpacity = 1;
+            divCalcRes.style.opacity = enabledOpacity;
+            divPostfix.style.opacity = enabledOpacity;
+            divPostfixLabel.style.opacity = enabledOpacity;
+
+            const enabledDecoration = "none";
+            divCalcRes.style.textDecoration = enabledDecoration;
+            divPostfix.style.textDecoration = enabledDecoration;
+            divPostfixLabel.textDecoration = enabledDecoration;
+        }
+
+
         function requestCalc() {
             var msg = document.getElementById("txtInput").value;
 
             if (msg) {
                 $.ajax({
                     type: "POST",
-                    //url: "https://localhost:5001/api/Calculate",
+                    //url: "http://localhost:8000/api/Calculate",
                     url: "https://calculatoraspnetcore20200224123521.azurewebsites.net/api/Calculate",
                     contentType: "application/json",
                     data: JSON.stringify(msg),
@@ -30,10 +64,10 @@
                             document.getElementById("divPostfix").innerHTML = res.InputInPostfix;
                             document.getElementById("divPostfixLabel").style.display = "block"
                             document.getElementById("divErrorMsg").innerHTML = "";
+                            enableResults();
                         } else {
-                            console.log(res.ErrorCode);
-                            console.log(res.ErrorMessage);
                             document.getElementById("divErrorMsg").innerHTML = errorMessages[res.ErrorCode];
+                            disableResults();
                         }
 
                     }
@@ -65,10 +99,10 @@
             color: white;
         }
 
-        input[type=text]:focus {
-            border-color:#1fdb83;
-            box-shadow: 0 0 8px 0 dodgerblue;
-        }
+            input[type=text]:focus {
+                border-color: #1fdb83;
+                box-shadow: 0 0 8px 0 dodgerblue;
+            }
 
         .divInput input[type=text] {
             padding-left: 42px;
@@ -80,31 +114,31 @@
             width: 45%;
         }
 
-        .divInput i{
-            position:absolute;
-            left: 0;
-            top: 18px;
-            padding:9px 8px 0px 12px; 
-            color: #aaa;
-            transition: .3s;
-        }
+            .divInput i {
+                position: absolute;
+                left: 0;
+                top: 18px;
+                padding: 9px 8px 0px 12px;
+                color: #aaa;
+                transition: .3s;
+            }
 
-        .divInput input[type=text]:focus + i {
-            color: #8a2d96;
-        }
+            .divInput input[type=text]:focus + i {
+                color: #8a2d96;
+            }
 
-        .divInput.inputIconBg i {
-            background-color: #aaa;
-            color: #fff;
-            padding: 9px 4px;
-            border-radius: 4px 0 0 4px;
-        }
+            .divInput.inputIconBg i {
+                background-color: #aaa;
+                color: #fff;
+                padding: 9px 4px;
+                border-radius: 4px 0 0 4px;
+            }
 
         .divResponse {
             width: 100%;
             position: relative;
             text-align: center;
-            color: white; 
+            color: white;
         }
 
 
@@ -123,7 +157,6 @@
             font-style: italic;
             color: #eb8038;
         }
-
     </style>
 </head>
 <body>
@@ -136,7 +169,7 @@
 
         </div>
         <div id="divCalcRes">
-            
+
         </div>
         <div id="divPostfix">
 
