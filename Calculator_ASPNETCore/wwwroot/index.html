@@ -25,11 +25,11 @@
         }
 
         input[type=text] {
-            width: 60%;
+            width: 100%;
             background-color: #241826;
             border: 2px solid #aaa;
-            border-radius: 7px;
-            margin: 80px 0;
+            border-radius: 12px;
+            margin: 8px 0;
             outline: none;
             padding: 18px;
             box-sizing: border-box;
@@ -42,19 +42,21 @@
         }
 
         .inputWithIcon input[type=text] {
-            padding-left: 40px;
+            padding-left: 42px;
         }
 
         .inputWithIcon {
             position: relative;
-            left: 20%;
+            margin: 0 auto;
+            width: 45%;
+            height: 30%;
         }
 
         .inputWithIcon i{
             position:absolute;
             left: 0;
             top: 18px;
-            padding:9px 8px; 
+            padding:9px 8px 0px 12px; 
             color: #aaa;
             transition: .3s;
         }
@@ -81,7 +83,7 @@
     </style>
 </head>
 <body>
-    <div class="inputWithIcon centered">
+    <div class="inputWithIcon">
         <input id="txtInput" type="text" placeholder="3*(4-5)^6^7" oninput="requestCalc()" />
         <i class="fa fa-calculator fa-lg fa-fw" aria-hidden="true"></i>
     </div>
