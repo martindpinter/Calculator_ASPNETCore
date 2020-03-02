@@ -35,6 +35,15 @@ namespace Calculator_ASPNETCore
     {
         public List<Token> Tokens;
         public ErrorCodes Error = ErrorCodes.OK;
+
+        public string SerializeTokens()
+        {
+            string res = "";
+            foreach (var t in Tokens)
+                res += t.Value + ' ';
+
+            return res.Trim();
+        }
     }
 
     public static class ExpressionEvaluator
@@ -49,127 +58,9 @@ namespace Calculator_ASPNETCore
             if (postfixTokens.Error > ErrorCodes.OK)
                 return new EvalResult() { ErrorCode = postfixTokens.Error };
 
-            string strPostfix = String.Empty;
-            foreach (var t in postfixTokens.Tokens)
-                strPostfix += t.Value;
-
-            EvalResult result = CalcFromPostfix(postfixTokens.Tokens);
-
-            return result;
-            //return new EvalResult() { CalcResult = result };
-        }
-
-        private static EvalResult CalcFromPostfix(List<Token> postfix)
-        {
-            Stack<double> resStack = new Stack<double>();
-            foreach(var t in postfix)
-            {
-                if (t.Type == TokenType.Number)
-                {
-                    Double.TryParse(t.Value, out double v);
-                    resStack.Push(v);
-                }
-                else
-                {
-                    if (resStack.Count < 2)
-                        return new EvalResult() { ErrorCode = ErrorCodes.InvalidSyntax };
-
-
-                    double rhs = resStack.Pop();
-                    double lhs = resStack.Pop();
-
-                    switch(t.Type)
-                    {
-                        case TokenType.Add:
-                            resStack.Push(lhs + rhs);
-                            break;
-                        case TokenType.Substract:
-                            resStack.Push(lhs - rhs);
-                            break;
-                        case TokenType.Multiply:
-                            resStack.Push(lhs * rhs);
-                            break;
-                        case TokenType.Divide:
-                            resStack.Push(lhs / rhs);
-                            break;
-                        case TokenType.Power:
-                            resStack.Push(Math.Pow(lhs, rhs));
-                            break;
-                    }
-                }
-            }
-
-            if (resStack.Count != 1)
-            {
-                return new EvalResult() { ErrorCode = ErrorCodes.InvalidSyntax };
-                // TODO - fix (tested with "()")
-                throw new Exception($"ERROR: final stack count must be 1 ({resStack.Count})");
-            }
-
-            return new EvalResult() { CalcResult = resStack.Pop().ToString() };
-        }
-
-        /// <summary>
-        /// Parses list of tokens into postfix notation using shunting yard algorithm
-        /// </summary>
-        /// <param name="tokenList"></param>
-        /// <returns></returns>
-        private static TokenOpResult InfixToPostfix(List<Token> tokenList)
-        {
-            List<Token> res = new List<Token>();
-
-            Dictionary<TokenType, int> precedence = new Dictionary<TokenType, int>()
-            {
-                { TokenType.Add, 1 },
-                { TokenType.Substract, 1 },
-                { TokenType.Multiply, 2 },
-                { TokenType.Divide, 2 },
-                { TokenType.Power, 3 }
-            };
-            Stack<Token> stack = new Stack<Token>();
-
-            foreach (var t in tokenList)
-            {
-                if (t.Type == TokenType.Number)
-                {
-                    res.Add(t);
-                }
-                //else if (Token is function)
-                else if (t.Type == TokenType.OpenParen)
-                {
-                    stack.Push(t);
-                }
-                else if (t.Type == TokenType.CloseParen)
-                {
-                    while((stack.Count > 0) && (stack.Peek().Type != TokenType.OpenParen))
-                    { 
-                        res.Add(stack.Pop());
-                    }
-
-                    if (stack.Count > 0 && stack.Peek().Type == TokenType.OpenParen)
-                    {
-                        stack.Pop(); // discard
-                    }
-                }
-                else
-                {
-                    while(stack.Count > 0
-                        && stack.Peek().Type != TokenType.OpenParen
-                        && (precedence[stack.Peek().Type] > precedence[t.Type]
-                        || (precedence[stack.Peek().Type] == precedence[t.Type] && t.Type != TokenType.Power)))
-                    {
-                        res.Add(stack.Pop());
-                    }
-                    stack.Push(t);
-                }
-            }
-
-            while (stack.Count > 0)
-            {
-                res.Add(stack.Pop());
-            }
-
-            return new TokenOpResult() { Tokens = res };
+            EvalResult calcRes = CalcFromPostfix(postfixTokens.Tokens);
+            calcRes.InputInPostfix = postfixTokens.SerializeTokens();
+            return calcRes;
         }
 
         private static TokenOpResult Tokenize(string data)
@@ -200,7 +91,7 @@ namespace Calculator_ASPNETCore
                         else
                         {
                             if ((data[i] != '\0') && !Char.IsWhiteSpace(data[i]))
-                                return new TokenOpResult() { Error = ErrorCodes.InvalidSyntax };
+                                return new TokenOpResult() { Error = ErrorCodes.InvalidCharacter };
                         }
                         break;
 
@@ -211,7 +102,7 @@ namespace Calculator_ASPNETCore
                             tokenList.Add(new Token()
                             {
                                 Type = TokenType.Number,
-                                Value = data.Substring(tokenStart, i - tokenStart) // +1?
+                                Value = data.Substring(tokenStart, i - tokenStart) 
                             });
 
                             i--;
@@ -221,6 +112,111 @@ namespace Calculator_ASPNETCore
             }
 
             return new TokenOpResult() { Tokens = tokenList };
+        }
+
+        /*** Parses list of tokens into postfix notation using shunting yard algorithm ***/
+        private static TokenOpResult InfixToPostfix(List<Token> tokenList)
+        {
+            List<Token> resList = new List<Token>();
+
+            Dictionary<TokenType, int> precedence = new Dictionary<TokenType, int>()
+            {
+                { TokenType.Add, 1 },
+                { TokenType.Substract, 1 },
+                { TokenType.Multiply, 2 },
+                { TokenType.Divide, 2 },
+                { TokenType.Power, 3 }
+            };
+            Stack<Token> stack = new Stack<Token>();
+
+            foreach (var t in tokenList)
+            {
+                if (t.Type == TokenType.Number)
+                {
+                    resList.Add(t);
+                }
+                //else if (Token is function)
+                else if (t.Type == TokenType.OpenParen)
+                {
+                    stack.Push(t);
+                }
+                else if (t.Type == TokenType.CloseParen)
+                {
+                    while((stack.Count > 0) && (stack.Peek().Type != TokenType.OpenParen))
+                    { 
+                        resList.Add(stack.Pop());
+                    }
+
+                    if (stack.Count > 0 && stack.Peek().Type == TokenType.OpenParen)
+                    {
+                        stack.Pop(); // discard
+                    }
+                }
+                else
+                {
+                    while(stack.Count > 0
+                        && stack.Peek().Type != TokenType.OpenParen
+                        && (precedence[stack.Peek().Type] > precedence[t.Type]
+                        || (precedence[stack.Peek().Type] == precedence[t.Type] && t.Type != TokenType.Power)))
+                    {
+                        resList.Add(stack.Pop());
+                    }
+                    stack.Push(t);
+                }
+            }
+
+            while (stack.Count > 0)
+            {
+                resList.Add(stack.Pop());
+            }
+
+            return new TokenOpResult() { Tokens = resList };
+        }
+
+        private static EvalResult CalcFromPostfix(List<Token> postfix)
+        {
+            Stack<double> resStack = new Stack<double>();
+            foreach(var t in postfix)
+            {
+                if (t.Type == TokenType.Number)
+                {
+                    Double.TryParse(t.Value, out double v);
+                    resStack.Push(v);
+                }
+                else
+                {
+                    if (resStack.Count < 2)
+                        return new EvalResult() { ErrorCode = ErrorCodes.IncompleteExpression };
+
+
+                    double rhs = resStack.Pop();
+                    double lhs = resStack.Pop();
+
+                    switch(t.Type)
+                    {
+                        case TokenType.Add:
+                            resStack.Push(lhs + rhs);
+                            break;
+                        case TokenType.Substract:
+                            resStack.Push(lhs - rhs);
+                            break;
+                        case TokenType.Multiply:
+                            resStack.Push(lhs * rhs);
+                            break;
+                        case TokenType.Divide:
+                            resStack.Push(lhs / rhs);
+                            break;
+                        case TokenType.Power:
+                            resStack.Push(Math.Pow(lhs, rhs));
+                            break;
+                    }
+                }
+            }
+
+            if (resStack.Count != 1) 
+                return new EvalResult() { ErrorCode = ErrorCodes.ParsingError };
+
+            return new EvalResult() { CalcResult = resStack.Pop().ToString() };
         }
     }
 }

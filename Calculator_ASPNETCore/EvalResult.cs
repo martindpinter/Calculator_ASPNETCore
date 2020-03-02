@@ -8,20 +8,16 @@ namespace Calculator_ASPNETCore
     public class EvalResult
     {
         public string CalcResult;
+        public string InputInPostfix;
 
         public ErrorCodes ErrorCode;
-        public string ErrorMessage;
     }
-
-    //public class ErrorObj
-    //{
-    //    public ErrorCodes Code;
-    //    public string Message;
-    //}
 
     public enum ErrorCodes
     {
         OK,
-        InvalidSyntax
+        InvalidCharacter,
+        IncompleteExpression,
+        ParsingError
     }
 }
