@@ -5,6 +5,7 @@
     <title></title>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
     <script type="text/javascript">
+
         function requestCalc() {
             var msg = document.getElementById("txtInput").value;
             $.ajax({
@@ -13,7 +14,8 @@
                 contentType: "application/json",
                 data: JSON.stringify(msg),
                 success: function (response) {
-                    document.getElementById("divResult").innerHTML = response;
+                    let res = JSON.parse(response);
+                    document.getElementById("divResult").innerHTML = res.CalcResult;
                 }
             });
         }
@@ -49,7 +51,6 @@
             position: relative;
             margin: 0 auto;
             width: 45%;
-            height: 30%;
         }
 
         .inputWithIcon i{

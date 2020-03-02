@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Calculator_ASPNETCore.Controllers
 {
@@ -15,7 +16,8 @@ namespace Calculator_ASPNETCore.Controllers
         [HttpPost]
         public string Post([FromBody] string value)
         {
-            return ExpressionEvaluator.Evaluate(value);
+            EvalResult jsonRes = ExpressionEvaluator.Evaluate(value);
+            return JsonConvert.SerializeObject(jsonRes);
         }
     }
 }

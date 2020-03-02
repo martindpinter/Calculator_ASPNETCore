@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace Calculator_ASPNETCore
 {
+
     public enum TokenType
     {
         Number,
@@ -30,23 +31,35 @@ namespace Calculator_ASPNETCore
         public string Value;
     }
 
+    public class TokenOpResult
+    {
+        public List<Token> Tokens;
+        public ErrorCodes Error = ErrorCodes.OK;
+    }
+
     public static class ExpressionEvaluator
     {
-        public static string Evaluate(string data)
+        public static EvalResult Evaluate(string data)
         {
+            TokenOpResult tokenizeRes = Tokenize(data);
+            if (tokenizeRes.Error > ErrorCodes.OK)
+                return new EvalResult() { ErrorCode = tokenizeRes.Error };
 
-            List<Token> tokenList = Tokenize(data);
-            List<Token> postfixList = ShuntingYard(tokenList);
+            TokenOpResult postfixTokens = InfixToPostfix(tokenizeRes.Tokens);
+            if (postfixTokens.Error > ErrorCodes.OK)
+                return new EvalResult() { ErrorCode = postfixTokens.Error };
 
-            string postfix = String.Empty;
-            foreach (var t in postfixList)
-                postfix += t.Value;
+            string strPostfix = String.Empty;
+            foreach (var t in postfixTokens.Tokens)
+                strPostfix += t.Value;
 
-            string result = Calc(postfixList);
+            EvalResult result = CalcFromPostfix(postfixTokens.Tokens);
+
             return result;
+            //return new EvalResult() { CalcResult = result };
         }
 
-        private static string Calc(List<Token> postfix)
+        private static EvalResult CalcFromPostfix(List<Token> postfix)
         {
             Stack<double> resStack = new Stack<double>();
             foreach(var t in postfix)
@@ -59,7 +72,7 @@ namespace Calculator_ASPNETCore
                 else
                 {
                     if (resStack.Count < 2)
-                        return "";
+                        return new EvalResult() { ErrorCode = ErrorCodes.InvalidSyntax };
 
 
                     double rhs = resStack.Pop();
@@ -88,12 +101,20 @@ namespace Calculator_ASPNETCore
 
             if (resStack.Count != 1)
             {
+                return new EvalResult() { ErrorCode = ErrorCodes.InvalidSyntax };
+                // TODO - fix (tested with "()")
                 throw new Exception($"ERROR: final stack count must be 1 ({resStack.Count})");
             }
-            return resStack.Pop().ToString();
+
+            return new EvalResult() { CalcResult = resStack.Pop().ToString() };
         }
 
-        private static List<Token> ShuntingYard(List<Token> tokenList)
+        /// <summary>
+        /// Parses list of tokens into postfix notation using shunting yard algorithm
+        /// </summary>
+        /// <param name="tokenList"></param>
+        /// <returns></returns>
+        private static TokenOpResult InfixToPostfix(List<Token> tokenList)
         {
             List<Token> res = new List<Token>();
 
@@ -148,10 +169,10 @@ namespace Calculator_ASPNETCore
                 res.Add(stack.Pop());
             }
 
-            return res;
+            return new TokenOpResult() { Tokens = res };
         }
 
-        private static List<Token> Tokenize(string data)
+        private static TokenOpResult Tokenize(string data)
         {
             List<Token> tokenList = new List<Token>();
             StateType state = StateType.NewToken;
@@ -161,7 +182,7 @@ namespace Calculator_ASPNETCore
 
             for (int i = 0; i < data.Length; i++)
             {
-                switch(state)
+                switch (state)
                 {
                     case StateType.NewToken:
                         if (Char.IsDigit(data[i]))
@@ -179,7 +200,7 @@ namespace Calculator_ASPNETCore
                         else
                         {
                             if ((data[i] != '\0') && !Char.IsWhiteSpace(data[i]))
-                                throw new NotImplementedException();    // not handled character
+                                return new TokenOpResult() { Error = ErrorCodes.InvalidSyntax };
                         }
                         break;
 
@@ -199,7 +220,7 @@ namespace Calculator_ASPNETCore
                 }
             }
 
-            return tokenList;
+            return new TokenOpResult() { Tokens = tokenList };
         }
     }
 }
