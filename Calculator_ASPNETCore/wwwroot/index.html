@@ -18,12 +18,75 @@
             });
         }
     </script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+    <style>
+        body {
+            background-color: #352438;
+        }
+
+        input[type=text] {
+            width: 60%;
+            background-color: #241826;
+            border: 2px solid #aaa;
+            border-radius: 7px;
+            margin: 80px 0;
+            outline: none;
+            padding: 18px;
+            box-sizing: border-box;
+            color: white;
+        }
+
+        input[type=text]:focus {
+            border-color:#1fdb83;
+            box-shadow: 0 0 8px 0 dodgerblue;
+        }
+
+        .inputWithIcon input[type=text] {
+            padding-left: 40px;
+        }
+
+        .inputWithIcon {
+            position: relative;
+            left: 20%;
+        }
+
+        .inputWithIcon i{
+            position:absolute;
+            left: 0;
+            top: 18px;
+            padding:9px 8px; 
+            color: #aaa;
+            transition: .3s;
+        }
+
+        .inputWithIcon input[type=text]:focus + i {
+            color: #8a2d96;
+        }
+
+        .inputWithIcon.inputIconBg i {
+            background-color: #aaa;
+            color: #fff;
+            padding: 9px 4px;
+            border-radius: 4px 0 0 4px;
+        }
+
+        #divResult {
+            width:100%;
+            color: white;
+            font-size: 72pt;
+            position:relative;
+            text-align: center;
+        }
+
+    </style>
 </head>
 <body>
-    <input id="txtInput" type="text" />
-    <button onclick="requestCalc()">Calculate</button>
+    <div class="inputWithIcon centered">
+        <input id="txtInput" type="text" placeholder="3*(4-5)^6^7" oninput="requestCalc()" />
+        <i class="fa fa-calculator fa-lg fa-fw" aria-hidden="true"></i>
+    </div>
     <div id="divResult">
-
+        
     </div>
 </body>
 </html>
