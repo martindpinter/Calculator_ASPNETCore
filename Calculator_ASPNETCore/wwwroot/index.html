@@ -13,6 +13,40 @@
             3: "Parsing error"
         };
 
+        function disableResults() {
+            const divCalcRes = document.getElementById("divCalcRes");
+            const divPostfix = document.getElementById("divPostfix");
+            const divPostfixLabel = document.getElementById("divPostfixLabel");
+
+            console.log("we are in disableResults()");
+            const disabledOpacity = 0.1;
+            divCalcRes.style.opacity = disabledOpacity;
+            divPostfix.style.opacity = disabledOpacity;
+            divPostfixLabel.style.opacity = disabledOpacity;
+
+            const disabledDecoration = "line-through";
+            divCalcRes.style.textDecoration = disabledDecoration;
+            divPostfix.style.textDecoration = disabledDecoration;
+            divPostfixLabel.textDecoration = disabledDecoration;
+        }
+
+        function enableResults() {
+            const divCalcRes = document.getElementById("divCalcRes");
+            const divPostfix = document.getElementById("divPostfix");
+            const divPostfixLabel = document.getElementById("divPostfixLabel");
+
+            const enabledOpacity = 1;
+            divCalcRes.style.opacity = enabledOpacity;
+            divPostfix.style.opacity = enabledOpacity;
+            divPostfixLabel.style.opacity = enabledOpacity;
+
+            const enabledDecoration = "none";
+            divCalcRes.style.textDecoration = enabledDecoration;
+            divPostfix.style.textDecoration = enabledDecoration;
+            divPostfixLabel.textDecoration = enabledDecoration;
+        }
+
+
         function requestCalc() {
             var msg = document.getElementById("txtInput").value;
 
@@ -29,10 +63,10 @@
                             document.getElementById("divPostfix").innerHTML = res.InputInPostfix;
                             document.getElementById("divPostfixLabel").style.display = "block"
                             document.getElementById("divErrorMsg").innerHTML = "";
+                            enableResults();
                         } else {
-                            console.log(res.ErrorCode);
-                            console.log(res.ErrorMessage);
                             document.getElementById("divErrorMsg").innerHTML = errorMessages[res.ErrorCode];
+                            disableResults();
                         }
 
                     }
